@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventário</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-box">
+      <h1 class="auth-title">INVENTÁRIO</h1>
+
+      <form id="loginForm" class="auth-form">
+        <label>Usuário
+          <input type="text" id="loginUser" autocomplete="username" maxlength="20">
+        </label>
+        <label>Senha
+          <input type="password" id="loginPass" autocomplete="current-password" maxlength="40">
+        </label>
+        <p class="auth-error" id="loginError"></p>
+        <button type="submit" class="btn">Entrar</button>
+        <p class="auth-switch">Não tem conta? <a href="#" id="goToRegister">Criar conta</a></p>
+      </form>
+
+      <form id="registerForm" class="auth-form" hidden>
+        <label>Usuário
+          <input type="text" id="registerUser" autocomplete="username" maxlength="20">
+        </label>
+        <label>Senha
+          <input type="password" id="registerPass" autocomplete="new-password" maxlength="40">
+        </label>
+        <label>Confirmar senha
+          <input type="password" id="registerPass2" autocomplete="new-password" maxlength="40">
+        </label>
+        <p class="auth-error" id="registerError"></p>
+        <button type="submit" class="btn">Criar conta</button>
+        <p class="auth-switch">Já tem conta? <a href="#" id="goToLogin">Entrar</a></p>
+      </form>
+    </div>
+  </div>
+
+  <div class="auth-overlay" id="characterOverlay" hidden>
+    <div class="character-box">
+      <h1 class="auth-title">PERSONAGENS</h1>
+
+      <div class="character-list" id="characterList"></div>
+
+      <form id="newCharacterForm" class="auth-form">
+        <label>Novo personagem
+          <input type="text" id="newCharacterName" maxlength="24" placeholder="Nome do personagem">
+        </label>
+        <p class="auth-error" id="characterError"></p>
+        <button type="submit" class="btn">+ Criar Personagem</button>
+      </form>
+
+      <p class="auth-switch"><a href="#" id="characterLogoutLink">Sair da conta</a></p>
+    </div>
+  </div>
+
+  <div class="case" id="case" hidden>
+    <div class="case-header">
+      <span class="case-title">INVENTÁRIO</span>
+      <div class="size-controls">
+        <button id="sizeMinus" class="btn-step" title="Diminuir inventário">−</button>
+        <span class="size-value" id="sizeValue">9 x 6</span>
+        <button id="sizePlus" class="btn-step" title="Aumentar inventário">+</button>
+      </div>
+      <div class="header-actions">
+        <span class="current-user" id="currentUserLabel"></span>
+        <button id="addItemBtn" class="btn">+ Adicionar Item</button>
+        <button id="storedItemsBtn" class="btn btn-secondary">Guardados</button>
+        <button id="switchCharacterBtn" class="btn btn-secondary">Personagens</button>
+        <button id="logoutBtn" class="btn btn-secondary">Sair</button>
+      </div>
+    </div>
+
+    <div class="case-body">
+      <div class="grid-wrapper">
+        <div class="grid" id="grid"></div>
+      </div>
+
+      <div class="details-panel" id="detailsPanel">
+        <div class="details-empty">Selecione um item</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <h2 id="modalTitle">Adicionar Item</h2>
+
+      <label>Nome
+        <input type="text" id="itemName" placeholder="Ex: Erva Verde" maxlength="30">
+      </label>
+
+      <label>Foto<span id="itemImageHint" hidden> (deixe em branco para manter a atual)</span>
+        <input type="file" id="itemImage" accept="image/*">
+      </label>
+
+      <img id="imagePreview" class="image-preview" hidden>
+
+      <label>Tamanho no inventário (em células)
+        <div class="size-inputs">
+          <input type="number" id="itemWidth" min="1" max="24" value="1" title="Largura">
+          <span class="size-inputs-sep">x</span>
+          <input type="number" id="itemHeight" min="1" max="16" value="1" title="Altura">
+        </div>
+      </label>
+
+      <label>Quantidade
+        <input type="number" id="itemQty" min="1" max="99" value="1">
+      </label>
+
+      <p class="modal-error" id="modalError"></p>
+
+      <div class="modal-actions">
+        <button id="cancelAdd" class="btn btn-secondary">Cancelar</button>
+        <button id="confirmAdd" class="btn">Adicionar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="storedOverlay">
+    <div class="modal stored-modal">
+      <h2>Itens Guardados</h2>
+
+      <div class="stored-list" id="storedList"></div>
+
+      <p class="modal-error" id="storedError"></p>
+
+      <div class="modal-actions">
+        <button id="closeStored" class="btn btn-secondary">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+[ {
+  "username" : "javatest",
+  "salt" : "0f696e3d0a451358e872c560af2ba863",
+  "passwordHash" : "b9b05c2ec292d1dbcabbe659b4d6af4638d1f6030114826834d4ee0baee5d908"
+}, {
+  "username" : "dual_1782516680143",
+  "salt" : "d9d71841d2967b4058f7f578ed7ec30f",
+  "passwordHash" : "7fa93fb37b0b531e8c0bbdee8fbb76d357e335ed64320221d0482f220551559f"
+}, {
+  "username" : "João Pedro",
+  "salt" : "2e430da5f59abf32d32383ab8f43fed7",
+  "passwordHash" : "c7365d6216020cb8a16d3ef57db8576dd24bfb0490f50aa234f4ead103dffa9d"
+}, {
+  "username" : "ana carla",
+  "salt" : "432347a8ad84ee927d18b997205560da",
+  "passwordHash" : "240c70623e1b72d3a7861aee6b8be731bdaaf96a27761223efb16c1a36c950cc"
+} ]

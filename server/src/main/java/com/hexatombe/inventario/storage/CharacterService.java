@@ -17,9 +17,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class CharacterService {
     private static final SecureRandom RANDOM = new SecureRandom();
-    private final JsonFileStore store;
+    private final JsonDbStore store;
 
-    public CharacterService(JsonFileStore store) {
+    public CharacterService(JsonDbStore store) {
         this.store = store;
     }
 

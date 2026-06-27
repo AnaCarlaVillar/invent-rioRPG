@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS json_store (
+  storage_key VARCHAR(500) PRIMARY KEY,
+  data TEXT NOT NULL
+);

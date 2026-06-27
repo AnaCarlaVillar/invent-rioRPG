@@ -15,9 +15,9 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private static final Path USERS_FILE = Path.of("users.json");
 
-    private final JsonFileStore store;
+    private final JsonDbStore store;
 
-    public UserService(JsonFileStore store) {
+    public UserService(JsonDbStore store) {
         this.store = store;
     }
 

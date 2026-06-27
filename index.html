@@ -77,6 +77,18 @@
     </div>
 
     <div class="case-body">
+      <div class="character-panel" id="characterPanel">
+        <div class="character-portrait-frame">
+          <img class="character-portrait" id="characterPortrait" hidden>
+          <div class="character-portrait-empty" id="characterPortraitEmpty">Sem aparência</div>
+        </div>
+        <input type="file" id="appearanceImageInput" accept="image/*" hidden>
+        <div class="character-panel-actions">
+          <button class="btn btn-small" id="addAppearanceBtn">+ Aparência</button>
+          <button class="btn btn-secondary btn-small" id="manageAppearancesBtn">Aparências</button>
+        </div>
+      </div>
+
       <div class="grid-wrapper">
         <div class="grid" id="grid"></div>
       </div>
@@ -133,6 +145,24 @@
 
       <div class="modal-actions">
         <button id="closeStored" class="btn btn-secondary">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="appearanceOverlay">
+    <div class="modal appearance-modal">
+      <h2>Aparências</h2>
+
+      <div class="appearance-list" id="appearanceList"></div>
+
+      <label class="appearance-add-label" for="appearanceImageInput">
+        + Adicionar nova aparência
+      </label>
+
+      <p class="modal-error" id="appearanceError"></p>
+
+      <div class="modal-actions">
+        <button id="closeAppearance" class="btn btn-secondary">Fechar</button>
       </div>
     </div>
   </div>

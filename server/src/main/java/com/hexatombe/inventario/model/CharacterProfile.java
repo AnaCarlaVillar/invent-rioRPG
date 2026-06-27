@@ -3,6 +3,7 @@ package com.hexatombe.inventario.model;
 public class CharacterProfile {
     public String id;
     public String name;
+    public String activeAppearanceId;
 
     public CharacterProfile() {
     }

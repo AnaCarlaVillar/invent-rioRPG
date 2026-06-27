@@ -104,6 +104,55 @@ body {
   min-height: 0;
 }
 
+.character-panel {
+  flex: 0 0 190px;
+  width: 190px;
+  border-right: 2px solid rgba(200, 30, 50, 0.4);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.character-portrait-frame {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  border: 2px solid #c81e3a;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.character-portrait {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.character-portrait-empty {
+  font-size: 13px;
+  opacity: 0.6;
+  text-align: center;
+  padding: 0 10px;
+}
+
+.character-panel-actions {
+  display: flex;
+  width: 100%;
+  gap: 6px;
+}
+
+.character-panel-actions .btn {
+  flex: 1 1 auto;
+  padding: 7px 6px;
+}
+
 .grid-wrapper {
   flex: 1 1 auto;
   min-width: 0;
@@ -248,6 +297,12 @@ body {
 
 .btn:hover {
   filter: brightness(1.15);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
 }
 
 .btn-secondary {
@@ -562,4 +617,80 @@ body {
   display: flex;
   gap: 6px;
   flex: 0 0 auto;
+}
+
+/* Aparências */
+
+.appearance-modal {
+  width: 420px;
+}
+
+.appearance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.appearance-empty {
+  margin: 6px 0;
+  font-size: 13px;
+  opacity: 0.7;
+  text-align: center;
+}
+
+.appearance-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(200, 30, 50, 0.4);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.appearance-card.active {
+  border-color: #ffcc33;
+  box-shadow: 0 0 8px rgba(255, 204, 51, 0.6);
+}
+
+.appearance-thumb {
+  width: 50px;
+  height: 60px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(200, 30, 50, 0.4);
+  border-radius: 4px;
+}
+
+.appearance-info {
+  flex: 1 1 auto;
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.appearance-actions {
+  display: flex;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.appearance-add-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 8px;
+  border: 2px dashed rgba(200, 30, 50, 0.5);
+  border-radius: 4px;
+  cursor: pointer;
+  color: #e8e0e0;
+}
+
+.appearance-add-label:hover {
+  border-color: #e0233b;
+  color: #fff;
 }

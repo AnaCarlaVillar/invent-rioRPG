@@ -98,12 +98,25 @@
   const storedError = document.getElementById('storedError');
   const closeStored = document.getElementById('closeStored');
 
+  // ---- DOM refs: character appearance ----
+  const characterPortrait = document.getElementById('characterPortrait');
+  const characterPortraitEmpty = document.getElementById('characterPortraitEmpty');
+  const addAppearanceBtn = document.getElementById('addAppearanceBtn');
+  const manageAppearancesBtn = document.getElementById('manageAppearancesBtn');
+  const appearanceOverlay = document.getElementById('appearanceOverlay');
+  const appearanceList = document.getElementById('appearanceList');
+  const appearanceImageInput = document.getElementById('appearanceImageInput');
+  const appearanceError = document.getElementById('appearanceError');
+  const closeAppearance = document.getElementById('closeAppearance');
+
   let currentUser = null;
   let currentCharacterId = null;
   let GRID_COLS = 9;
   let GRID_ROWS = 6;
   let items = [];
   let storedItems = [];
+  let appearances = [];
+  let activeAppearanceId = null;
   let selectedId = null;
   let pendingImageData = null;
   let dragState = null;
@@ -205,6 +218,187 @@
   function updateStoredItemsBtnLabel() {
     storedItemsBtn.textContent = storedItems.length > 0 ? `Guardados (${storedItems.length})` : 'Guardados';
   }
+
+  // ---- Character appearances (saved gallery, one active at a time) ----
+  function appearancesKey(characterId) {
+    return `hexatombe_inventory_appearances_${currentUser}__${characterId}`;
+  }
+
+  async function loadAppearances() {
+    if (SERVER_MODE) {
+      return apiFetch(`/api/characters/${currentCharacterId}/appearances`);
+    }
+    try {
+      const raw = localStorage.getItem(appearancesKey(currentCharacterId));
+      const parsed = raw ? JSON.parse(raw) : null;
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveAppearancesLocal() {
+    localStorage.setItem(appearancesKey(currentCharacterId), JSON.stringify(appearances));
+  }
+
+  // File mode only: the active appearance id lives on the character record itself,
+  // mirroring how the server keeps it on CharacterProfile.
+  async function setActiveAppearanceLocal(appearanceId) {
+    const characters = await loadCharacters();
+    const character = characters.find(c => c.id === currentCharacterId);
+    if (character) {
+      character.activeAppearanceId = appearanceId;
+      saveCharacters(characters);
+    }
+  }
+
+  function renderCharacterPortrait() {
+    const active = appearances.find(a => a.id === activeAppearanceId);
+    if (active) {
+      characterPortrait.src = active.image;
+      characterPortrait.hidden = false;
+      characterPortraitEmpty.hidden = true;
+    } else {
+      characterPortrait.hidden = true;
+      characterPortraitEmpty.hidden = false;
+    }
+  }
+
+  function renderAppearanceList() {
+    appearanceList.innerHTML = '';
+    if (appearances.length === 0) {
+      appearanceList.innerHTML = '<p class="appearance-empty">Nenhuma aparência salva ainda.</p>';
+      return;
+    }
+    appearances.forEach((ap, idx) => {
+      const isActive = ap.id === activeAppearanceId;
+      const card = document.createElement('div');
+      card.className = 'appearance-card' + (isActive ? ' active' : '');
+
+      const thumb = document.createElement('img');
+      thumb.className = 'appearance-thumb';
+      thumb.src = ap.image;
+      thumb.alt = `Aparência ${idx + 1}`;
+
+      const info = document.createElement('div');
+      info.className = 'appearance-info';
+      info.textContent = isActive ? 'Em uso' : `Aparência ${idx + 1}`;
+
+      const actions = document.createElement('div');
+      actions.className = 'appearance-actions';
+
+      const useBtn = document.createElement('button');
+      useBtn.className = 'btn btn-small';
+      useBtn.textContent = 'Usar';
+      useBtn.disabled = isActive;
+      useBtn.addEventListener('click', () => useAppearance(ap.id));
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'btn btn-danger btn-small';
+      deleteBtn.textContent = 'Excluir';
+      deleteBtn.addEventListener('click', () => removeAppearance(ap.id));
+
+      actions.appendChild(useBtn);
+      actions.appendChild(deleteBtn);
+      card.appendChild(thumb);
+      card.appendChild(info);
+      card.appendChild(actions);
+      appearanceList.appendChild(card);
+    });
+  }
+
+  async function addAppearance(imageData) {
+    try {
+      if (SERVER_MODE) {
+        const character = await apiFetch(`/api/characters/${currentCharacterId}/appearances`, { method: 'POST', body: { image: imageData } });
+        appearances = await loadAppearances();
+        activeAppearanceId = character.activeAppearanceId;
+      } else {
+        const appearance = { id: 'appr_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7), image: imageData };
+        appearances.push(appearance);
+        saveAppearancesLocal();
+        activeAppearanceId = appearance.id;
+        await setActiveAppearanceLocal(activeAppearanceId);
+      }
+    } catch (err) {
+      appearanceError.textContent = err.message;
+      return;
+    }
+    appearanceError.textContent = '';
+    renderAppearanceList();
+    renderCharacterPortrait();
+  }
+
+  async function useAppearance(id) {
+    try {
+      if (SERVER_MODE) {
+        const character = await apiFetch(`/api/characters/${currentCharacterId}/appearances/active`, { method: 'PUT', body: { appearanceId: id } });
+        activeAppearanceId = character.activeAppearanceId;
+      } else {
+        activeAppearanceId = id;
+        await setActiveAppearanceLocal(id);
+      }
+    } catch (err) {
+      appearanceError.textContent = err.message;
+      return;
+    }
+    appearanceError.textContent = '';
+    renderAppearanceList();
+    renderCharacterPortrait();
+  }
+
+  async function removeAppearance(id) {
+    const confirmed = window.confirm('Excluir essa aparência definitivamente? Essa ação não pode ser desfeita.');
+    if (!confirmed) return;
+    try {
+      if (SERVER_MODE) {
+        const character = await apiFetch(`/api/characters/${currentCharacterId}/appearances/${id}`, { method: 'DELETE' });
+        appearances = appearances.filter(a => a.id !== id);
+        activeAppearanceId = character.activeAppearanceId;
+      } else {
+        appearances = appearances.filter(a => a.id !== id);
+        saveAppearancesLocal();
+        if (activeAppearanceId === id) {
+          activeAppearanceId = appearances.length ? appearances[appearances.length - 1].id : null;
+          await setActiveAppearanceLocal(activeAppearanceId);
+        }
+      }
+    } catch (err) {
+      appearanceError.textContent = err.message;
+      return;
+    }
+    appearanceError.textContent = '';
+    renderAppearanceList();
+    renderCharacterPortrait();
+  }
+
+  function openAppearanceOverlay() {
+    appearanceError.textContent = '';
+    renderAppearanceList();
+    appearanceOverlay.classList.add('open');
+  }
+
+  function closeAppearanceOverlay() {
+    appearanceOverlay.classList.remove('open');
+  }
+
+  addAppearanceBtn.addEventListener('click', () => appearanceImageInput.click());
+  manageAppearancesBtn.addEventListener('click', openAppearanceOverlay);
+  closeAppearance.addEventListener('click', closeAppearanceOverlay);
+  appearanceOverlay.addEventListener('click', (e) => {
+    if (e.target === appearanceOverlay) closeAppearanceOverlay();
+  });
+
+  appearanceImageInput.addEventListener('change', () => {
+    const file = appearanceImageInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      addAppearance(reader.result);
+      appearanceImageInput.value = '';
+    };
+    reader.readAsDataURL(file);
+  });
 
   // ---- Characters (per user) ----
   function charactersKey() {
@@ -674,6 +868,7 @@
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && modalOverlay.classList.contains('open')) closeModal();
     if (e.key === 'Escape' && storedOverlay.classList.contains('open')) closeStoredOverlay();
+    if (e.key === 'Escape' && appearanceOverlay.classList.contains('open')) closeAppearanceOverlay();
     if ((e.key === 'r' || e.key === 'R') && selectedId && !modalOverlay.classList.contains('open')) {
       const tag = (e.target.tagName || '').toLowerCase();
       if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
@@ -798,6 +993,8 @@
     currentCharacterId = null;
     items = [];
     storedItems = [];
+    appearances = [];
+    activeAppearanceId = null;
     selectedId = null;
     caseEl.hidden = true;
     characterOverlay.hidden = true;
@@ -817,6 +1014,8 @@
     currentCharacterId = null;
     items = [];
     storedItems = [];
+    appearances = [];
+    activeAppearanceId = null;
 
     let characters;
     try {
@@ -883,13 +1082,14 @@
 
   async function openCharacter(characterId) {
     currentCharacterId = characterId;
-    let character, savedSize, loadedItems, loadedStored;
+    let character, savedSize, loadedItems, loadedStored, loadedAppearances;
     try {
       const characters = await loadCharacters();
       character = characters.find(c => c.id === characterId);
       savedSize = await loadSize();
       loadedItems = await loadItems();
       loadedStored = await loadStoredItems();
+      loadedAppearances = await loadAppearances();
     } catch (err) {
       window.alert(err.message);
       return;
@@ -899,11 +1099,14 @@
     GRID_ROWS = savedSize ? savedSize.rows : 6;
     items = loadedItems.filter(it => it && it.image && it.name && it.w && it.h && it.col && it.row);
     storedItems = loadedStored.filter(it => it && it.image && it.name && it.w && it.h);
+    appearances = loadedAppearances.filter(a => a && a.image);
+    activeAppearanceId = character ? character.activeAppearanceId : null;
     selectedId = null;
 
     buildGridCells();
     render();
     updateStoredItemsBtnLabel();
+    renderCharacterPortrait();
 
     currentUserLabel.textContent = character ? `${currentUser} — ${character.name}` : currentUser;
     characterOverlay.hidden = true;
@@ -923,6 +1126,7 @@
         localStorage.removeItem(itemsKey(characterId));
         localStorage.removeItem(sizeKey(characterId));
         localStorage.removeItem(storedItemsKey(characterId));
+        localStorage.removeItem(appearancesKey(characterId));
       }
     } catch (err) {
       window.alert(err.message);

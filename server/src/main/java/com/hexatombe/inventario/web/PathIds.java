@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 
 public class PathIds {
     private static final Pattern VALID_CHARACTER_ID = Pattern.compile("^char_[0-9a-f]+$");
+    private static final Pattern VALID_APPEARANCE_ID = Pattern.compile("^appr_[0-9a-f]+$");
 
     private PathIds() {
     }
@@ -12,6 +13,13 @@ public class PathIds {
     public static String requireValidCharacterId(String id) {
         if (id == null || !VALID_CHARACTER_ID.matcher(id).matches()) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Identificador de personagem inválido.");
+        }
+        return id;
+    }
+
+    public static String requireValidAppearanceId(String id) {
+        if (id == null || !VALID_APPEARANCE_ID.matcher(id).matches()) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identificador de aparência inválido.");
         }
         return id;
     }

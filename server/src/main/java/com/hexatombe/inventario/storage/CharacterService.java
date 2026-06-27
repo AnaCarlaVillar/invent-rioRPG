@@ -1,6 +1,7 @@
 package com.hexatombe.inventario.storage;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.hexatombe.inventario.model.Appearance;
 import com.hexatombe.inventario.model.CharacterProfile;
 import com.hexatombe.inventario.model.GridSize;
 import com.hexatombe.inventario.model.Item;
@@ -100,5 +101,73 @@ public class CharacterService {
 
     public void saveSize(String username, String characterId, GridSize size) {
         store.write(characterDir(username, characterId).resolve("size.json"), size);
+    }
+
+    private Path appearancesFile(String username, String characterId) {
+        return characterDir(username, characterId).resolve("appearances.json");
+    }
+
+    private CharacterProfile findCharacter(List<CharacterProfile> characters, String characterId) {
+        return characters.stream()
+                .filter(c -> c.id.equals(characterId))
+                .findFirst()
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Personagem não encontrado."));
+    }
+
+    public synchronized List<Appearance> getAppearances(String username, String characterId) {
+        return store.read(appearancesFile(username, characterId), new TypeReference<List<Appearance>>() {
+        }, new ArrayList<>());
+    }
+
+    public synchronized CharacterProfile addAppearance(String username, String characterId, String image) {
+        if (image == null || image.isBlank()) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Selecione uma foto para a aparência.");
+        }
+        List<CharacterProfile> characters = list(username);
+        CharacterProfile character = findCharacter(characters, characterId);
+
+        List<Appearance> appearances = getAppearances(username, characterId);
+        byte[] idBytes = new byte[8];
+        RANDOM.nextBytes(idBytes);
+        Appearance appearance = new Appearance("appr_" + HexFormat.of().formatHex(idBytes), image);
+        appearances.add(appearance);
+        store.write(appearancesFile(username, characterId), appearances);
+
+        character.activeAppearanceId = appearance.id;
+        store.write(charactersFile(username), characters);
+        return character;
+    }
+
+    public synchronized CharacterProfile setActiveAppearance(String username, String characterId, String appearanceId) {
+        List<CharacterProfile> characters = list(username);
+        CharacterProfile character = findCharacter(characters, characterId);
+
+        List<Appearance> appearances = getAppearances(username, characterId);
+        boolean exists = appearances.stream().anyMatch(a -> a.id.equals(appearanceId));
+        if (!exists) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Aparência não encontrada.");
+        }
+
+        character.activeAppearanceId = appearanceId;
+        store.write(charactersFile(username), characters);
+        return character;
+    }
+
+    public synchronized CharacterProfile deleteAppearance(String username, String characterId, String appearanceId) {
+        List<CharacterProfile> characters = list(username);
+        CharacterProfile character = findCharacter(characters, characterId);
+
+        List<Appearance> appearances = getAppearances(username, characterId);
+        boolean removed = appearances.removeIf(a -> a.id.equals(appearanceId));
+        if (!removed) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Aparência não encontrada.");
+        }
+        store.write(appearancesFile(username, characterId), appearances);
+
+        if (appearanceId.equals(character.activeAppearanceId)) {
+            character.activeAppearanceId = appearances.isEmpty() ? null : appearances.get(appearances.size() - 1).id;
+            store.write(charactersFile(username), characters);
+        }
+        return character;
     }
 }

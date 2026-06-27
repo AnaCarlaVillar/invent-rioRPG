@@ -16,12 +16,13 @@
   // (http://...) it talks to the REST API instead. Same UI, same code paths,
   // just a different storage adapter underneath.
   const SERVER_MODE = location.protocol !== 'file:';
+  const API_BASE = SERVER_MODE ? 'https://inventariorpg.onrender.com' : '';
   let authToken = SERVER_MODE ? localStorage.getItem(TOKEN_KEY) : null;
 
   async function apiFetch(path, options = {}) {
     const headers = { 'Content-Type': 'application/json' };
     if (authToken) headers.Authorization = `Bearer ${authToken}`;
-    const res = await fetch(path, {
+    const res = await fetch(API_BASE + path, {
       method: options.method || 'GET',
       headers,
       body: options.body !== undefined ? JSON.stringify(options.body) : undefined
